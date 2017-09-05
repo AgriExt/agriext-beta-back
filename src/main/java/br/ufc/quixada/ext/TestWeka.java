@@ -1,69 +1,57 @@
 package br.ufc.quixada.ext;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.functions.SMO;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
+import weka.classifiers.Evaluation;
+import weka.classifiers.trees.M5P;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.StringToWordVector;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.CSVLoader;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
 
 public class TestWeka {
 
-    /*
-     * java -cp %WEKA_HOME% 
-       weka.classifiers.meta.FilteredClassifier 
-       -t ReutersAcq-train.arff 
-       -T ReutersAcq-test.arff 
-       -W "weka.classifiers.functions.SMO -N 2" 
-       -F "weka.filters.unsupervised.attribute.StringToWordVector -S"
-     */
+	/**
+	 * takes 2 arguments: - CSV input file - ARFF output file
+	 */
+	public static ArffSaver csv2arff(String path) {
+		CSVLoader loader = new CSVLoader();
+		Instances data = null;
+		try {
+			loader.setSource(new File(path));
+			data = loader.getDataSet();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-    public static void main(final String [] args) throws Exception {
-        System.out.println("Running");
+		// save ARFF
+		ArffSaver saver = new ArffSaver();
+		if (data != null) {
+			saver.setInstances(data);
+			return saver;
+		}
+		return saver;
 
-        final StringToWordVector filter = new StringToWordVector();
-        final Classifier classifier = new SMO(); 
+	}
 
-        // Create numeric attributes.
-        final String[] keywords = { "test1", "test2"};
-        FastVector attributes = new FastVector(keywords.length + 1);
-        for (int i = 0 ; i < keywords.length; i++) {
-          attributes.addElement(new Attribute(keywords[i]));
-        }        
-        // Add class attribute.
-        final FastVector classValues = new FastVector(2);
-        classValues.addElement("miss");
-        classValues.addElement("hit");
+	public static void main(String[] args) throws Exception {
+		// if (args.length != 2) {
+		// System.out.println("\nUsage: CSV2Arff <input.csv> <output.arff>\n");
+		// System.exit(1);
+		// }
 
-        attributes.addElement(new Attribute("Class", classValues));
+		// load CSV
+		Classifier classifie = new M5P();
+		Instances data = csv2arff("/home/antoniorrm/Dropbox/UFC/Bolsa/dataset/Limpos/2016total-semoutlier2.csv").getInstances();
+		data.setClassIndex(data.numAttributes() - 1);
+		classifie.buildClassifier(data);
+		
+		
+		System.out.println(classifie.toString());
+	
 
-        final Instances data = new Instances("Data1", attributes, 100);
-        data.setClassIndex(data.numAttributes() - 1);
-
-        ///////////
-
-        Instance instance = new Instances(10);
-        instance.setDataset(data);
-        // instance.setValue(testset.attribute(0),testset.attribute(0).addStringValue(obj.toString()));
-        System.out.println("==>." + data.attribute(0));
-        instance.setValue(data.attribute(0), data.attribute(0).addStringValue("test1"));
-        instance.setDataset(data);
-
-        // Add class value to instance.
-        instance.setClassValue(1.0);
-
-        // Add instance to training data.
-        data.add(instance);
-
-        // Use filter.
-        filter.input(instance);
-        Instances filteredData = Filter.useFilter(data, filter);
-
-        // Rebuild classifier.
-        classifier.buildClassifier(filteredData);
-       
-    }
-
+	}
 } // End of the class //

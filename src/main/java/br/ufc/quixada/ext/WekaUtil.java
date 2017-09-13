@@ -57,7 +57,8 @@ public class WekaUtil {
 		Instances inst = csv2arff(path).getInstances();
 		inst.setClassIndex(inst.numAttributes() - 1);
 		inst.randomize(rnd);
-
+		
+		
 
 		int trainSize = (int) Math.round(inst.numInstances() * percent/100);
 		int testSize = inst.numInstances() - trainSize;
@@ -69,7 +70,7 @@ public class WekaUtil {
 
 		Evaluation eval = new Evaluation(train);
 		eval.evaluateModel(classify, test);
-
+		
 		output = eval.toSummaryString() + "\n" + classify.toString();
 		return output;
 

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Random;
 
+import junit.framework.Test;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
@@ -44,29 +45,17 @@ public class WekaUtil {
 
 	}
 
-	public static String jensenHaysen(double rad_solar_total, double temp_ar_media) {
-
-		double rad = rad_solar_total / 2450;
-
-		double et0 = rad * (0.025 * temp_ar_media + 0.078);
-
-		return "" + et0;
-	}
-
-	public static String quixadaHC(String p) throws Exception {
-		String path = "/home/antoniorrm/" + p + ".csv";
-		String model = "/home/antoniorrm/m5p-new.model";
-		Classifier m5pModel = null;
+	public static String modelEt0(double kc, String nome, String modelNome) throws Exception {
+		String path = "/home/antoniorrm/" + nome;
+		String model = "/home/antoniorrm/" + modelNome;
+		Classifier Model = null;
 		try {
-			m5pModel = (Classifier) weka.core.SerializationHelper.read(new FileInputStream(model));
+			Model = (Classifier) weka.core.SerializationHelper.read(new FileInputStream(model));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -81,12 +70,62 @@ public class WekaUtil {
 
 		String resultado = "";
 		for (Instance instance : test) {
-			double label = m5pModel.classifyInstance(instance);
+			double label = Model.classifyInstance(instance);
 			instance.setClassValue(label);
-			resultado = resultado + "\n" + instance.value(index);
+			double value = instance.value(index);
+			resultado = resultado + value + ", " + value * kc + "\n";
 		}
 
 		return resultado;
+
+	}
+
+	
+	public static String jensenHaysen(double rad_solar_total, double temp_ar_media) {
+
+		double rad = rad_solar_total / 2450;
+		double et0 = rad * (0.025 * temp_ar_media + 0.078);
+		return "" + et0;
+	}
+
+	public static String quixadaHC(double kc, String nome) throws Exception {
+		String path = "/home/antoniorrm/" + nome;
+		String model = "/home/antoniorrm/m5p-new.model";
+		Classifier m5pModel = null;
+		try {
+			m5pModel = (Classifier) weka.core.SerializationHelper.read(new FileInputStream(model));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Instances test = csv2arff(path).getInstances();
+		int index = test.numAttributes() - 1;
+		
+		if (test.classIndex() == -1)
+			test.setClassIndex(index);
+
+		String resultado = "";
+		double evapo = 0.0;
+		
+		for (Instance instance : test) {
+			double label = m5pModel.classifyInstance(instance);
+			instance.setClassValue(label);
+			double value = instance.value(index);
+			double kcValue = value * kc;
+			resultado = resultado + value + ", " + kcValue + "\n";
+			evapo = evapo +value;
+		}
+		double irriga = evapo * kc;
+	
+		resultado = resultado + evapo +", " + irriga;
+		return resultado ;
 
 	}
 
@@ -143,28 +182,11 @@ public class WekaUtil {
 	}
 
 	public static void main(String[] args) throws Exception {
-		// String output;
-		// Classifier classifie = new M5P();
-		// Instances data =
-		// csv2arff("/home/antoniorrm/Dropbox/UFC/Bolsa/dataset/Limpos/2016total-semoutlier2.csv").getInstances();
-		//
-		// //Instances data2 =
-		// csv2arff("/home/antoniorrm/Dropbox/UFC/Bolsa/dataset/Limpos/2016total-semoutlier2.csv").getInstances();
-		// data.setClassIndex(data.numAttributes() - 1);
-		// classifie.buildClassifier(data);
-		//
-		// Evaluation evaluation = new Evaluation(data);
-		// for (Instance instance : data) {
-		// evaluation.evaluateModelOnceAndRecordPrediction(classifie, instance);
-		// }
-		//
-		// output = evaluation.toSummaryString() + "\n" + classifie.toString();
-		//// System.out.println(output);
 		// System.out.println(classifie(0, "2016total-semoutlier2.csv"));
 		// System.out.println(classifie(1,
 		// "/home/antoniorrm/Dropbox/UFC/Bolsa/dataset/Limpos/2016total-semoutlier2.csv"));
-		System.out.println(quixadaHC("dataset-test"));
-		//
+		System.out.println(quixadaHC(0.7, "dataset-test.csv"));
+
 
 	}
 }

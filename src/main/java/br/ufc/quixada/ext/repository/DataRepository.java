@@ -6,5 +6,5 @@ import br.ufc.quixada.ext.model.Data;
 
 @Repository
 public interface DataRepository extends MongoRepository<Data, String>{
-	
+	Data findById(String id);
 }

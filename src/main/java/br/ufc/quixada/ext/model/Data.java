@@ -25,6 +25,4 @@ public class Data {
 		this.data = dados;
 		
 	} 
-	
-
 }

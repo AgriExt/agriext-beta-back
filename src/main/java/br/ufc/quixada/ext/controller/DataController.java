@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.ufc.quixada.ext.model.Data;
-import br.ufc.quixada.ext.service.DataService;
+//import br.ufc.quixada.ext.service.DataService;
 import br.ufc.quixada.ext.util.WekaUtil;
 
 @RestController
@@ -34,34 +34,34 @@ import br.ufc.quixada.ext.util.WekaUtil;
 @CrossOrigin(origins = "*")
 public class DataController {
 
-	@Autowired
-	private DataService dataservice;
-
-	@GetMapping("/all")
-	public ResponseEntity<List<Data>> getAll() {
-		return dataservice.get();
-	}	
-
-	@GetMapping("/{id}")
-	public ResponseEntity<Data> getById(@PathVariable("id") String id) {
-		return dataservice.get(id);
-	}
-
-	@PutMapping
-	public ResponseEntity<String> insert(@RequestBody Data data) {
-		return dataservice.save(data);
-
-	}
-
-	@PostMapping
-	public ResponseEntity<String> update(@RequestBody Data data) {
-		return dataservice.update(data);
-	}
-
-	@DeleteMapping("/{id}")
-	public void delete(@PathVariable("id") String id) {
-		this.dataservice.delete(id);
-	}
+//	@Autowired
+//	private DataService dataservice;
+//
+//	@GetMapping("/all")
+//	public ResponseEntity<List<Data>> getAll() {
+//		return dataservice.get();
+//	}	
+//
+//	@GetMapping("/{id}")
+//	public ResponseEntity<Data> getById(@PathVariable("id") String id) {
+//		return dataservice.get(id);
+//	}
+//
+//	@PutMapping
+//	public ResponseEntity<String> insert(@RequestBody Data data) {
+//		return dataservice.save(data);
+//
+//	}
+//
+//	@PostMapping
+//	public ResponseEntity<String> update(@RequestBody Data data) {
+//		return dataservice.update(data);
+//	}
+//
+//	@DeleteMapping("/{id}")
+//	public void delete(@PathVariable("id") String id) {
+//		this.dataservice.delete(id);
+//	}
 
 	@PostMapping("/uploadModel")
 	public @ResponseBody String uploadFileHandler(@RequestParam("file") MultipartFile file, @RequestParam("model") MultipartFile model, @RequestParam("kc")  double kc) {

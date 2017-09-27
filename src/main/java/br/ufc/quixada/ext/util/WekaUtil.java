@@ -80,7 +80,8 @@ public class WekaUtil {
 
 	public static String quixadaHC(double kc, String nome) throws Exception {
 		String path = "/home/antoniorrm/" + nome;
-		String model = "/home/antoniorrm/m5p-new.model";
+		String model = "/home/antoniorrm/demo/m5p-new.model";
+		System.out.println(model);
 		Classifier m5pModel = null;
 		try {
 			m5pModel = (Classifier) weka.core.SerializationHelper.read(new FileInputStream(model));

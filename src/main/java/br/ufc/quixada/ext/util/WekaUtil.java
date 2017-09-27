@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Random;
 
-import junit.framework.Test;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
@@ -28,10 +27,8 @@ public class WekaUtil {
 		Instances data = null;
 		try {
 			loader.setSource(new File(path));
-
 			data = loader.getDataSet();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -80,13 +77,6 @@ public class WekaUtil {
 
 	}
 
-	
-	public static String jensenHaysen(double rad_solar_total, double temp_ar_media) {
-
-		double rad = rad_solar_total / 2450;
-		double et0 = rad * (0.025 * temp_ar_media + 0.078);
-		return "" + et0;
-	}
 
 	public static String quixadaHC(double kc, String nome) throws Exception {
 		String path = "/home/antoniorrm/" + nome;

@@ -63,19 +63,6 @@ public class DataController {
 		this.dataservice.delete(id);
 	}
 
-	@GetMapping("/getEt0JJ")
-	public String getEt0JJ(@PathVariable("id") String id) {
-		String et0 = "";
-		try {
-//			 et0 = WekaUtil.jensenHaysen(rad_solar_total, temp_ar_media);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			et0 = e.getMessage();
-		}
-
-		return et0;
-	}
-
 	@PostMapping("/uploadModel")
 	public @ResponseBody String uploadFileHandler(@RequestParam("file") MultipartFile file, @RequestParam("model") MultipartFile model, @RequestParam("kc")  double kc) {
 		String fileName = "";

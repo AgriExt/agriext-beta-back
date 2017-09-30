@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Random;
 
@@ -18,9 +19,15 @@ import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 
 public class WekaUtil {
+	
+	 /*
+	 * COLOQUE O CAMINHO DO SEU PROJETO 
+	 */
+	static String myPath = "/home/antoniorrm/";
+		
 
 	/**
-	 * takes 2 arguments: - CSV input file - ARFF output file
+	 * CONVERTE O CSV EM UM ARFF
 	 */
 	public static ArffSaver csv2arff(String path) {
 		CSVLoader loader = new CSVLoader();
@@ -32,7 +39,7 @@ public class WekaUtil {
 			e.printStackTrace();
 		}
 
-		// save ARFF
+		// Salva ARFF
 		ArffSaver saver = new ArffSaver();
 		if (data != null) {
 			saver.setInstances(data);
@@ -42,21 +49,21 @@ public class WekaUtil {
 
 	}
 
+	//Gera o ET0 a partir de um Modelo enviado
 	public static String modelEt0(double kc, String nome, String modelNome) throws Exception {
-		String path = "/home/antoniorrm/" + nome;
-		String model = "/home/antoniorrm/" + modelNome;
+		String path = myPath + nome;
+		String model = myPath + modelNome;
 		Classifier Model = null;
 		try {
 			Model = (Classifier) weka.core.SerializationHelper.read(new FileInputStream(model));
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			return e.getMessage();
 		} catch (IOException e) {
-			e.printStackTrace();
+			return e.getMessage();
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			return e.getMessage();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return e.getMessage();
 		}
 
 		Instances test = csv2arff(path).getInstances();
@@ -66,34 +73,43 @@ public class WekaUtil {
 			test.setClassIndex(index);
 
 		String resultado = "";
+		double evapo = 0.0;
+		
 		for (Instance instance : test) {
 			double label = Model.classifyInstance(instance);
 			instance.setClassValue(label);
 			double value = instance.value(index);
-			resultado = resultado + value + ", " + value * kc + "\n";
+			double kcValue = value * kc;
+			resultado = resultado + value + ", " + kcValue + "\n";
+			evapo = evapo +value;
 		}
-
-		return resultado;
-
+		double irriga = evapo * kc;
+	
+		resultado = resultado + evapo +", " + irriga;
+		return extracted(resultado);
 	}
 
-
+	/*
+	 * Gera o ET0 a partir de um Modelo m5p-new.model
+	 * Modelo criado por Hinessa Caminha - UFC Quixadá
+	 */
 	public static String quixadaHC(double kc, String nome) throws Exception {
-		String path = "/home/antoniorrm/" + nome;
-		String model = "/home/antoniorrm/demo/m5p-new.model";
-		System.out.println(model);
+		String path = myPath + nome;
+		
+		//Caminho para o Modelo m5p-new.model
+		String model = "/home/antoniorrm/Dropbox/UFC/Bolsa/demoback/m5p-new.model";
+		
 		Classifier m5pModel = null;
 		try {
 			m5pModel = (Classifier) weka.core.SerializationHelper.read(new FileInputStream(model));
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			return e.getMessage();
 		} catch (IOException e) {
-			e.printStackTrace();
+			return e.getMessage();
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			return e.getMessage();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return e.getMessage();
 		}
 
 		Instances test = csv2arff(path).getInstances();
@@ -116,18 +132,19 @@ public class WekaUtil {
 		double irriga = evapo * kc;
 	
 		resultado = resultado + evapo +", " + irriga;
-		return resultado ;
+		return extracted(resultado);
 
 	}
 
-	public static String classifie(int type, String name) {
+	@SuppressWarnings("resource")
+	public static String classifier(int type, String name) {
 
 		double percent = 70;
 		int seed = 1;
 		Random rnd = new Random(seed);
-		String output;
-		String pathOut = "/home/antoniorrm/" + name;
-		String path = "/home/antoniorrm/" + name;
+		String output = "";
+		String pathOut = myPath + name;
+		String path = myPath + name;
 
 		Classifier classify = null;
 		if (type == 0) {
@@ -153,8 +170,7 @@ public class WekaUtil {
 			eval.evaluateModel(classify, test);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return e.getMessage();
 		}
 
 		ObjectOutputStream save;
@@ -163,21 +179,16 @@ public class WekaUtil {
 			save.writeObject(classify);
 			save.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return e.getMessage();
 		}
 
 		output = eval.toSummaryString() + "\nsmashline\n" + classify.toString();
-		return output;
+		return extracted(output);
 
 	}
 
-	public static void main(String[] args) throws Exception {
-		// System.out.println(classifie(0, "2016total-semoutlier2.csv"));
-		// System.out.println(classifie(1,
-		// "/home/antoniorrm/Dropbox/UFC/Bolsa/dataset/Limpos/2016total-semoutlier2.csv"));
-		System.out.println(quixadaHC(0.7, "dataset-test.csv"));
-
-
+	
+	private static String extracted(String output) {
+		return output;
 	}
 }

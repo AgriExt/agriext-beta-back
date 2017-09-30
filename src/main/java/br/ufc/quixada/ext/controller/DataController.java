@@ -2,12 +2,17 @@
 package br.ufc.quixada.ext.controller;
 
 import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.util.List;
 
+import javax.servlet.ServletContext;
+
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,86 +39,110 @@ import br.ufc.quixada.ext.util.WekaUtil;
 @CrossOrigin(origins = "*")
 public class DataController {
 
-//	@Autowired
-//	private DataService dataservice;
-//
-//	@GetMapping("/all")
-//	public ResponseEntity<List<Data>> getAll() {
-//		return dataservice.get();
-//	}	
-//
-//	@GetMapping("/{id}")
-//	public ResponseEntity<Data> getById(@PathVariable("id") String id) {
-//		return dataservice.get(id);
-//	}
-//
-//	@PutMapping
-//	public ResponseEntity<String> insert(@RequestBody Data data) {
-//		return dataservice.save(data);
-//
-//	}
-//
-//	@PostMapping
-//	public ResponseEntity<String> update(@RequestBody Data data) {
-//		return dataservice.update(data);
-//	}
-//
-//	@DeleteMapping("/{id}")
-//	public void delete(@PathVariable("id") String id) {
-//		this.dataservice.delete(id);
-//	}
+	/*
+	 * COLOQUE O CAMINHO DO SEU PROJETO
+	 */
+	String myPath = "/home/antoniorrm/";
+
+	// @Autowired
+	// private DataService dataservice;
+	//
+	// @GetMapping("/all")
+	// public ResponseEntity<List<Data>> getAll() {
+	// return dataservice.get();
+	// }
+	//
+	// @GetMapping("/{id}")
+	// public ResponseEntity<Data> getById(@PathVariable("id") String id) {
+	// return dataservice.get(id);
+	// }
+	//
+	// @PutMapping
+	// public ResponseEntity<String> insert(@RequestBody Data data) {
+	// return dataservice.save(data);
+	//
+	// }
+	//
+	// @PostMapping
+	// public ResponseEntity<String> update(@RequestBody Data data) {
+	// return dataservice.update(data);
+	// }
+	//
+	// @DeleteMapping("/{id}")
+	// public void delete(@PathVariable("id") String id) {
+	// this.dataservice.delete(id);
+	// }
 
 	@PostMapping("/uploadModel")
-	public @ResponseBody String uploadFileHandler(@RequestParam("file") MultipartFile file, @RequestParam("model") MultipartFile model, @RequestParam("kc")  double kc) {
+	public @ResponseBody String uploadFileHandler(@RequestParam("file") MultipartFile file,
+			@RequestParam("model") MultipartFile model, @RequestParam("kc") double kc) {
 		String fileName = "";
 		String modelName = "";
 		File file_exists = null;
-		File model_existis= null;
-		
+		File model_existis = null;
+
 		try {
+			// Pega os nomes dos arquivos
 			fileName = file.getOriginalFilename();
 			modelName = model.getOriginalFilename();
-			String pathFile = "/home/antoniorrm/" + fileName;
-			String pathModel = "/home/antoniorrm/" + modelName;
-			System.out.println(fileName + " " + kc);
-			byte[] bytes = file.getBytes();
+			// Define o caminho que os arquivos vao ser salvos
+			String pathFile = myPath + fileName;
+			String pathModel = myPath + modelName;
+			// Pega os bytes dos arquivos
+			byte[] csv = file.getBytes();
+			byte[] bModel = model.getBytes();
+			// Cria os Files
 			file_exists = new File(pathFile);
-			model_existis= new File(pathFile);
+			model_existis = new File(pathModel);
+
+			// Verifica se o csv ja existem
 			if (!file_exists.exists()) {
-				System.out.println("teste");
-				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(pathFile)));
-				stream.write(bytes);
+				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(file_exists));
+				stream.write(csv);
 				stream.close();
 			}
-			if (!model_existis.exists()) {
-				System.out.println("teste");
-				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(pathModel)));
-				stream.write(bytes);
-				stream.close();
-			}
+			// Salva o model enviado
+			BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(model_existis));
+			stream.write(bModel);
+			stream.close();
+
+			// Retorna a predição do csv e do model enviado
 			return WekaUtil.modelEt0(kc, fileName, modelName);
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 
 			return e.getMessage();
 		}
 	}
-	
+
 	@PostMapping("/uploadFile")
-	public @ResponseBody String uploadFileHandler(@RequestParam("file") MultipartFile file, @RequestParam("kc")  double kc) {
+	public @ResponseBody String uploadFileHandler(@RequestParam("file") MultipartFile file,
+			@RequestParam("kc") double kc) {
+		
 		String fileName = "";
+		
 		File file_exists = null;
+		
 		try {
+			//Pega os nome dos arquivo
 			fileName = file.getOriginalFilename();
-			String path = "/home/antoniorrm/" + fileName;
-			System.out.println(fileName + " " + kc);
+			//Define o caminho que o arquivo vai ser salvo
+			String path = myPath + fileName;
+			//Pega o byte do arquivo
 			byte[] bytes = file.getBytes();
+			
+			//Cria o File
 			file_exists = new File(path);
+			
+			//Verifica se o csv ja existem
 			if (!file_exists.exists()) {
-				System.out.println("teste");
-				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path)));
+				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(file_exists));
 				stream.write(bytes);
 				stream.close();
 			}
+			
+			//Returno a predição do Modelo QuixadaHC
 			return WekaUtil.quixadaHC(kc, fileName);
 		} catch (Exception e) {
 
@@ -128,19 +157,27 @@ public class DataController {
 		String fileName = "";
 		int type = Integer.parseInt(id);
 		File file_exists = null;
+		
 		try {
+			//Pega os nome dos arquivo
 			fileName = file.getOriginalFilename();
-			String path = "/home/antoniorrm/" + fileName;
-			System.out.println(fileName + " " + id);
+			//Define o caminho que o arquivo vai ser salvo
+			String path = myPath + fileName;
+			//Pega o byte do arquivo
 			byte[] bytes = file.getBytes();
+			//Cria o File
 			file_exists = new File(path);
+
+			//Verifica se o csv ja existem
 			if (!file_exists.exists()) {
-				System.out.println("teste");
-				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path)));
+				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(file_exists));
 				stream.write(bytes);
 				stream.close();
 			}
-			return WekaUtil.classifie(type, fileName);
+			
+			//Faz a classificação do modelo a partir do csv enviado e salvo o modelo no path definido
+			return WekaUtil.classifier(type, fileName);
+			
 		} catch (Exception e) {
 			return e.getMessage();
 		}
@@ -149,26 +186,30 @@ public class DataController {
 	@GetMapping("/download/{nome}")
 	public ResponseEntity<byte[]> downloadFileHandler(@PathVariable("nome") String nome) {
 
-		// retrieve contents of "C:/tmp/report.pdf" that were written in showHelp
-		String path = "/home/antoniorrm/" + nome + ".model";
+		//Local onde o model gerado no classificador foi salvo
+		String path = myPath + nome + ".model";
 		File file = null;
 		file = new File(path);
-		System.out.println(file.getName());
+		//Verifica se o model existe
 		if (file.isFile()) {
+			//Cria o header Http
 			HttpHeaders headers = new HttpHeaders();
-			// headers.setContentType(MediaType.parseMediaType("application/pdf"));
+			//Pega o nome do arquivo
 			String filename = file.getName();
-
+			//Cria o array de bytes
 			byte[] contents = null;
 			try {
+				//Pega os bytes do arquivo e joga no array
 				contents = Files.readAllBytes(file.toPath());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST);
+				return response;
 			}
-
+			//forma o header 
 			headers.setContentDispositionFormData(filename, filename);
+			//Cria o response
 			ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(contents, headers, HttpStatus.OK);
+			//Retorna a response criada
 			return response;
 		}
 		return null;
